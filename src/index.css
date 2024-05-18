@@ -1,0 +1,25 @@
+/*
+    index.css. This file is used by Tailwind
+*/
+
+/*
+  General Tailwind 
+  directives
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Definitions for TailWind constants
+*/
+
+/* 
+  Example usage: 
+  <h1 className="t-h1">Try!</h1>
+*/
+.t-h1
+{
+  @apply bg-gray-800 text-3xl text-white p-4;
+}

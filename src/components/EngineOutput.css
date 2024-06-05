@@ -1,0 +1,4 @@
+.textarea
+{
+  @apply w-full h-full border border-gray-300 resize-none p-2;
+}

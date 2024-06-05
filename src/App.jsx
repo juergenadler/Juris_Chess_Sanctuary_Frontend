@@ -1,15 +1,20 @@
-//
-// App.jsx
-//
+import React from 'react';
+import './App.css';
+import ChessboardComponent from './components/ChessBoard.jsx';
+import EngineOutput from './components/EngineOutput.jsx';
 
-import './App.css'
-
-function App() {
+const App = () => {
   return (
-    <h1 className="t-h1">
-      Hello! This is App.jsx. Testing for Tailwind functionality.
-    </h1>
-  )
+    <div className="app-container flex">
+      <div className="w-1/2 flex flex-col items-stretch">
+        <ChessboardComponent />
+        <EngineOutput />
+      </div>
+      <div className="right-half w-1/2">
+
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;

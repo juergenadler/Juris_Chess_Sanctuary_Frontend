@@ -1,4 +1,16 @@
+/* EngineOutput.css */
+
+.container
+{
+  @apply p-4;
+}
+
+.title
+{
+  @apply text-xl font-bold mb-4;
+}
+
 .textarea
 {
-  @apply w-full h-full border border-gray-300 resize-none p-2;
+  @apply w-full h-64 p-2 border border-gray-300 rounded-lg overflow-auto;
 }

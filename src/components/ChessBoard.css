@@ -12,7 +12,12 @@
   @apply px-2 py-1 text-lg bg-black text-white rounded-md w-[200px] h-[50px] cursor-pointer;
 }
 
-.button-style:hover
-{
+  .button-style:hover
+  {
     @apply bg-gray-800;
-}
+  }
+
+  .button-style:disabled
+  {
+    @apply bg-gray-400 text-gray-700 cursor-not-allowed;
+  }

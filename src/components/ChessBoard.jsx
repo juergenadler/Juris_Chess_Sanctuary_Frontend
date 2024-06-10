@@ -90,16 +90,16 @@ const ChessboardComponent = () => {
         />
       </div>
       <div className="move-controls">
-        <button onClick={goToBeginning} className="button-style">
+        <button onClick={goToBeginning} className="button-style" disabled={moveCursor === 0}>
           <FontAwesomeIcon icon={faStepBackward} className="text-2xl" />
         </button>
-        <button onClick={goBackward} className="button-style">
+        <button onClick={goBackward} className="button-style" disabled={moveCursor === 0}>
           <FontAwesomeIcon icon={faBackward} className="text-2xl" />
         </button>
-        <button onClick={goForward} className="button-style">
+        <button onClick={goForward} className="button-style" disabled={moveCursor >= movesListLAN.length}>
           <FontAwesomeIcon icon={faForward} className="text-2xl" />
         </button>
-        <button onClick={goToEnd} className="button-style">
+        <button onClick={goToEnd} className="button-style" disabled={moveCursor >= movesListLAN.length}>
           <FontAwesomeIcon icon={faStepForward} className="text-2xl" />
         </button>
       </div>

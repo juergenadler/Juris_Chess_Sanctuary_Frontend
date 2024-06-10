@@ -1,92 +1,83 @@
 ﻿import React, { useState } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
-import axios from 'axios';
-
-import './ChessBoard.css'; 
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBackward, faForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons'
+import './ChessBoard.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBackward, faForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 
 const ChessboardComponent = () => {
   const [game, setGame] = useState(new Chess());
   const [position, setPosition] = useState(game.fen());
-  const [moveIndex, setMoveIndex] = useState(0);
+  const [moveCursor, setMoveCursor] = useState(0);
+  const [movesListLAN, setMovesListLAN] = useState([]);
+  const [movesListPGN, setMovesListPGN] = useState([]);
 
   const onDrop = (sourceSquare, targetSquare) => {
     try {
-      console.log("OnDrop");
-      const gameCopy = new Chess(game.fen()); // the pgn way of pgn = new Chess(); pgn.loadPgn(game.pgn()); runs into issues with the move function. Avoid load_pgn() function.
+      const gameCopy = new Chess(game.fen());
+
+      let promotion = 'q'; // default promotion to queen
+      if ((sourceSquare[1] === '7' && targetSquare[1] === '8') || (sourceSquare[1] === '2' && targetSquare[1] === '1')) {
+        promotion = prompt("Choose promotion piece: q (queen), r (rook), b (bishop), n (knight)", "q");
+        if (!['q', 'r', 'b', 'n'].includes(promotion)) {
+          promotion = 'q'; // default to queen if invalid input
+        }
+      }
 
       const move = gameCopy.move({
         from: sourceSquare,
         to: targetSquare,
-        promotion: 'q', // always promote to queen for simplicity
+        promotion: promotion,
       });
 
-      //
-      if (move === null) {
-        // Currently with react-chessboard, I see that this condition is being handled by the library itself,
-        // but in a way that it doesn't show any error message to the user (but to the developer)
-        console.error("Invalid move from " + sourceSquare + " to " + targetSquare);
-        return;
+      if (move) {
+        const moveLAN = `${move.from}${move.to}${move.promotion ? move.promotion : ''}`.toLowerCase();
+        const movePGN = gameCopy.history({ verbose: true }).pop().san;
+
+        setGame(gameCopy);
+        setPosition(gameCopy.fen());
+        setMovesListLAN(prevMoves => [...prevMoves.slice(0, moveCursor), moveLAN]);
+        setMovesListPGN(prevMoves => [...prevMoves.slice(0, moveCursor), movePGN]);
+        setMoveCursor(moveCursor + 1);
       }
-
-      // TODO: Is this move is legal
-
-
-      setGame(gameCopy);
-      setPosition(gameCopy.fen());
-      setMoveIndex(moveIndex + 1);
     } catch (error) {
       console.error("An error occurred during the move:", error);
     }
   };
 
-  const goToBeginning = () => {
+  const updateBoardPosition = (index) => {
     const gameCopy = new Chess();
-    setGame(gameCopy);
+    for (let i = 0; i < index; i++) {
+      gameCopy.move(movesListLAN[i]);
+    }
     setPosition(gameCopy.fen());
-    setMoveIndex(0);
+    setMoveCursor(index);
+  };
+
+  const goToBeginning = () => {
+    updateBoardPosition(0);
   };
 
   const goBackward = () => {
-    if (moveIndex > 0) {
-      console.log("Move index before going backward:", moveIndex);
-      const history = game.history();
-      console.log("Game history:", history);
-      console.log("Move index - 1:", moveIndex - 1);
-      console.log("Game history[moveIndex - 1]:", history[moveIndex - 1]);
-      const moveNotation = history[moveIndex - 1];
-      const move = game.move(moveNotation);
-      if (move !== null) {
-        setPosition(game.fen());
-        setMoveIndex(moveIndex - 1);
-      }
+    if (moveCursor > 0) {
+      updateBoardPosition(moveCursor - 1);
     }
   };
-  
 
   const goForward = () => {
-    if (moveIndex < game.history().length) {
-      console.log("Game history before going forward:", game.history());
-      const moveNotation = game.history()[moveIndex];
-      const move = game.move(moveNotation);
-      if (move !== null) {
-        setPosition(game.fen());
-        setMoveIndex(moveIndex + 1);
-      }
+    if (moveCursor < movesListLAN.length) {
+      updateBoardPosition(moveCursor + 1);
     }
   };
-  
+
   const goToEnd = () => {
-    const gameCopy = new Chess();
-    for (let i = 0; i < game.history().length; i++) {
-      gameCopy.move(game.history()[i]);
+    updateBoardPosition(movesListLAN.length);
+  };
+
+  const gotoMoveByIndex = (index) => {
+    if (index >= 0 && index <= movesListLAN.length) {
+      updateBoardPosition(index);
     }
-    setGame(gameCopy);
-    setPosition(gameCopy.fen());
-    setMoveIndex(game.history().length);
   };
 
   return (
@@ -95,7 +86,7 @@ const ChessboardComponent = () => {
         <Chessboard
           position={position}
           onPieceDrop={(sourceSquare, targetSquare) => onDrop(sourceSquare, targetSquare)}
-          boardWidth={window.innerWidth / 2 - 20} // Responsive width
+          boardWidth={window.innerWidth / 2 - 20}
         />
       </div>
       <div className="move-controls">
@@ -114,7 +105,6 @@ const ChessboardComponent = () => {
       </div>
     </div>
   );
-}
+};
 
-
-  export default ChessboardComponent;
+export default ChessboardComponent;

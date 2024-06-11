@@ -12,22 +12,23 @@ const ChessboardComponent = () => {
   const [movesListLAN, setMovesListLAN] = useState([]);
   const [movesListPGN, setMovesListPGN] = useState([]);
 
-  const onDrop = (sourceSquare, targetSquare) => {
+  // "Misusing" useEffect() to log the values of some state variables as it is called after every render.
+  // Reason: State updates are asynchronous, so the console.log() statements would be misplaced in OnDrop()
+  // where the state updates are being triggered, but the state no actually updated.
+  useEffect(() => {
+    console.log("movesListLAN", movesListLAN);
+    console.log("movesListPGN", movesListPGN);
+    console.log("moveCursor", moveCursor);
+  }, [movesListLAN, movesListPGN, moveCursor]);
+
+  const onDrop = (sourceSquare, targetSquare, piece) => {
     try {
       const gameCopy = new Chess(game.fen());
-
-      let promotion = 'q'; // default promotion to queen
-      if ((sourceSquare[1] === '7' && targetSquare[1] === '8') || (sourceSquare[1] === '2' && targetSquare[1] === '1')) {
-        promotion = prompt("Choose promotion piece: q (queen), r (rook), b (bishop), n (knight)", "q");
-        if (!['q', 'r', 'b', 'n'].includes(promotion)) {
-          promotion = 'q'; // default to queen if invalid input
-        }
-       }
 
       const move = gameCopy.move({
         from: sourceSquare,
         to: targetSquare,
-        promotion: promotion,
+        promotion: piece[1].toLowerCase(), // Convert to lowercase, we get something like "wb" or "bq"
       });
 
       if (move) {
@@ -47,18 +48,6 @@ const ChessboardComponent = () => {
       console.error("An error occurred during the move:", error);
     }
   };
-
-  // "Misusing" useEffect() to log the values of some state variables as it is called after every render.
-  // Reason: State updates are asynchronous, so the console.log() statements would be misplaced in OnDrop()
-  // where the state updates are being triggered, but the state no actually updated.
-  useEffect(() => {
-    console.log("movesListLAN", movesListLAN);
-    console.log("movesListPGN", movesListPGN);
-    console.log("moveCursor", moveCursor);
-  }, [movesListLAN, movesListPGN, moveCursor]);
-
-
-  // Functions to update the board position based on the move index
 
   const updateBoardPosition = (index) => {
     const gameCopy = new Chess();
@@ -100,7 +89,8 @@ const ChessboardComponent = () => {
       <div className="chessboard-wrapper">
         <Chessboard
           position={position}
-          onPieceDrop={(sourceSquare, targetSquare) => onDrop(sourceSquare, targetSquare)}
+          onPieceDrop={(sourceSquare, targetSquare, piece) => onDrop(sourceSquare, targetSquare, piece)}
+          onPromotion={(piece) => onDrop(null, null, piece)} // Capture promotion piece
           boardWidth={window.innerWidth / 2 - 20}
         />
       </div>

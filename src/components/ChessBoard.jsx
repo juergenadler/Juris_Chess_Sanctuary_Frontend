@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import './ChessBoard.css';
@@ -22,7 +22,7 @@ const ChessboardComponent = () => {
         if (!['q', 'r', 'b', 'n'].includes(promotion)) {
           promotion = 'q'; // default to queen if invalid input
         }
-      }
+       }
 
       const move = gameCopy.move({
         from: sourceSquare,
@@ -31,19 +31,34 @@ const ChessboardComponent = () => {
       });
 
       if (move) {
-        const moveLAN = `${move.from}${move.to}${move.promotion ? move.promotion : ''}`.toLowerCase();
+        const moveLAN = gameCopy.history({ verbose: true }).pop().lan;
         const movePGN = gameCopy.history({ verbose: true }).pop().san;
 
         setGame(gameCopy);
         setPosition(gameCopy.fen());
-        setMovesListLAN(prevMoves => [...prevMoves.slice(0, moveCursor), moveLAN]);
-        setMovesListPGN(prevMoves => [...prevMoves.slice(0, moveCursor), movePGN]);
-        setMoveCursor(moveCursor + 1);
+        setMoveCursor(prevMoveCursor => {
+          const newMoveCursor = prevMoveCursor + 1;
+          setMovesListLAN(prevMoves => [...prevMoves.slice(0, prevMoveCursor), moveLAN]);
+          setMovesListPGN(prevMoves => [...prevMoves.slice(0, prevMoveCursor), movePGN]);
+          return newMoveCursor;
+        });
       }
     } catch (error) {
       console.error("An error occurred during the move:", error);
     }
   };
+
+  // "Misusing" useEffect() to log the values of some state variables as it is called after every render.
+  // Reason: State updates are asynchronous, so the console.log() statements would be misplaced in OnDrop()
+  // where the state updates are being triggered, but the state no actually updated.
+  useEffect(() => {
+    console.log("movesListLAN", movesListLAN);
+    console.log("movesListPGN", movesListPGN);
+    console.log("moveCursor", moveCursor);
+  }, [movesListLAN, movesListPGN, moveCursor]);
+
+
+  // Functions to update the board position based on the move index
 
   const updateBoardPosition = (index) => {
     const gameCopy = new Chess();

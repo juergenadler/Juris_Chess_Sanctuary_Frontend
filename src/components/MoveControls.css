@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.move-controls
+{
+  @apply flex justify-center w-full mt-4 space-x-4;
+}
+
+.button-style
+{
+  @apply px-2 py-1 text-lg bg-black text-white rounded-md w-[200px] h-[50px] cursor-pointer;
+}
+
+  .button-style:hover
+  {
+    @apply bg-gray-800;
+  }
+
+  .button-style:disabled
+  {
+    @apply bg-gray-400 text-gray-700 cursor-not-allowed;
+  }
